@@ -14,7 +14,7 @@ services:
       dockerfile: ./Dockerfile-dummy
     ports:
       - 9703:9703
-      - internal
+
 
 networks:
   gateway:
@@ -23,5 +23,4 @@ networks:
   
   internal:
     external: false
-      
       
