@@ -1,9 +1,0 @@
-FROM python:3.8-slim-buster
-
-
-COPY . .
-RUN pip install -r src/requirements.txt
-
-
-EXPOSE 9703
-CMD ["flask", "--app", "src/dummyServer.py", "run", "--port", "9703"]

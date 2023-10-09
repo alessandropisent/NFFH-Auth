@@ -1,7 +1,7 @@
 services:
   auth:
     build:
-      dockerfile: ./Dockerfile
+      dockerfile: ./app/Dockerfile
     ports:
       - 9702:9702
     networks:
@@ -11,7 +11,7 @@ services:
   
   dummy:
     build: 
-      dockerfile: ./Dockerfile-dummy
+      dockerfile: ./dummyServer/Dockerfile
     ports:
       - 9703:9703
 
