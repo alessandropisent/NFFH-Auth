@@ -18,8 +18,8 @@ h_name = "name"
 h_address = "address"
 h_succ = "success"
 
-dbAddress = "http://127.0.0.1:8081/login"
-dbAddressSU = "http://127.0.0.1:8081/signup"
+dbAddress = "http://farmer-be:9703/login"
+dbAddressSU = "http://farmer-be:9703/signup"
 
 s_invalidToke = "FAIL"
 

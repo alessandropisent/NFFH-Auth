@@ -1,0 +1,27 @@
+services:
+  auth:
+    build:
+      dockerfile: ./Dockerfile
+    ports:
+      - 9702:9702
+    networks:
+      - gateway
+      - internal
+  
+  
+  dummy:
+    build: 
+      dockerfile: ./Dockerfile-dummy
+    ports:
+      - 9703:9703
+      - internal
+
+networks:
+  gateway:
+    external: true
+    name: auth
+  
+  internal:
+    external: false
+      
+      
