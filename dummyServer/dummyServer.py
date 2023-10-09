@@ -47,4 +47,6 @@ def signup():
     print(diReq)
     
     return jsonify({h_succ:True})
-    
+
+if __name__ == '__main__':
+    app.run(host="localhost", port=9703, debug=True)
