@@ -11,6 +11,8 @@ services:
     container_name: dummy
     build: 
       dockerfile: ./dummyServer/Dockerfile
+    ports:
+    - 9703:9703
     networks:
       - internal
 
