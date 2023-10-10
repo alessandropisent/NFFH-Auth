@@ -32,11 +32,11 @@ def login():
 
     headerToken = {"mail" : mail, "algorithm":"HS256", "algo":"HS256" }
     
-    head = {h_mail : "test@gmail.com"}
+    head = {h_mail : mail}
     
-    dict_response = requests.post(url=dbAddress, params=head)
+    dict_response = requests.get(url=dbAddress, params=head)
     
-    #print(dict_response.text)
+    print(dict_response.text)
     
     r = json.loads(dict_response.text)
     
