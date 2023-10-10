@@ -18,8 +18,8 @@ h_name = "name"
 h_address = "address"
 h_succ = "success"
 
-dbAddress = "http://127.0.0.1:9703/login"
-dbAddressSU = "http://127.0.0.1:9703/signup"
+dbAddress = "http://dummy:9703/login"
+dbAddressSU = "http://dummy:9703/signup"
 
 s_invalidToke = "FAIL"
 
@@ -113,4 +113,4 @@ def verifyToken():
     return jsonify({h_succ:False})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=9701, host='0.0.0.0')

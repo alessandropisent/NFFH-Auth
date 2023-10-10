@@ -1,19 +1,16 @@
 services:
   auth:
+    container_name: auth
     build:
       dockerfile: ./app/Dockerfile
-    ports:
-      - 9702:9702
     networks:
       - gateway
       - internal
-  
-  
+
   dummy:
+    container_name: dummy
     build: 
       dockerfile: ./dummyServer/Dockerfile
-    ports:
-      - 9703:9703
     networks:
       - internal
 
