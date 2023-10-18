@@ -25,7 +25,6 @@ dbFarmerAddress = "http://farmer-be:9703"
 s_invalidToke = "FAIL"
 
 # LOGIN
-
 # role : farmer or client
 @app.route('/<role>/login', methods=['POST'])
 def farmer_login(role):
