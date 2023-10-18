@@ -29,8 +29,10 @@ s_invalidToke = "FAIL"
 @app.route('/<role>/login', methods=['POST'])
 def farmer_login(role):
     
-    mail = request.args.get(h_mail)
-    passw = request.args.get(h_pass)
+    data = request.json
+    
+    mail = data[h_mail]
+    passw = data[h_pass]
 
     #uncripted header
     headerToken = {"mail" : mail,h_role:role, "algo":"HS256" }
@@ -80,13 +82,15 @@ def register(role):
     
     # Get all info per specification
     
-    mail = request.args.get(h_mail)
-    passw = request.args.get(h_pass)
-    name = request.args.get(h_name)
-    username = request.args.get(h_username)
-    image = request.args.get(h_image)
-    area = request.args.get(h_area)
-    address = request.args.get(h_address)
+    data = request.json
+    
+    mail = data[h_mail]
+    passw = data[h_pass]
+    name = data[h_name]
+    username = data[h_username]
+    image = data[h_image]
+    area = data[h_area]
+    address = data[h_address]
     
     #head of toke, uncrypted
     headerToken = {h_mail : mail, h_role: role, "algo":"HS256" }
@@ -115,7 +119,7 @@ def register(role):
     
     # get the dictionary of the response
     r = json.loads(dict_response.text)
-    return head
+    #return head
     
     #Succesfuly created user in db
     if(r[h_succ] ):
