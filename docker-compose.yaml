@@ -6,6 +6,8 @@ services:
     networks:
       - gateway
       - internal
+      - farmer-be
+      - client-be
 
   dummy:
     container_name: dummy
@@ -20,8 +22,11 @@ services:
 networks:
   gateway:
     external: true
-    name: auth
-  
+    name: g-auth
   internal:
     external: false
+  farmer-be:
+    name: a-farmer-be
+  client-be:
+    name: a-client-be
       

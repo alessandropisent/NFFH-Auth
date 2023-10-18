@@ -19,8 +19,8 @@ h_address = "address"
 h_succ = "success"
 h_errStringLogin = "error"
 
-dbClientAddress = "http://dummy:9703"
-dbFarmerAddress = "http://dummy:9703"
+dbClientAddress = "http://client-be:9702"
+dbFarmerAddress = "http://farmer-be:9703"
 
 s_invalidToke = "FAIL"
 
@@ -102,7 +102,7 @@ def register(role):
         head = {h_mail : mail, h_pass : passw, h_username : username, h_image:image, h_area:area,h_address:address}
     
         # Response
-        dict_response = requests.post(url=dbFarmerAddress+"/signup", params=head)
+        dict_response = requests.post(url=dbFarmerAddress, params=head)
     
     elif role == "client":
         # Paramethers for the post request to the db
