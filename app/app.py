@@ -86,7 +86,6 @@ def register(role):
     
     mail = data[h_mail]
     passw = data[h_pass]
-    name = data[h_name]
     username = data[h_username]
     image = data[h_image]
     area = data[h_area]
@@ -120,6 +119,7 @@ def register(role):
     # get the dictionary of the response
     r = json.loads(dict_response.text)
     #return head
+    return head
     
     #Succesfuly created user in db
     if(r[h_succ] ):
