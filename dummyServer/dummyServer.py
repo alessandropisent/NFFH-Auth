@@ -21,9 +21,9 @@ h_succ = "success"
 @app.route('/login', methods=['post'])
 def getUser():
     
-    mail = request.args.get(h_mail)
+    reqBody = request.get_json()
     
-    print(request.headers)
+    mail = reqBody['mail']
     
     if (mail == "test@gmail.com"):
         return jsonify({h_succ:True, h_pass: "Difficult password"})
