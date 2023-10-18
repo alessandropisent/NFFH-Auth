@@ -5,26 +5,15 @@ services:
       dockerfile: ./app/Dockerfile
     networks:
       - gateway
-      - internal
       - farmer-be
       - client-be
 
-  dummy:
-    container_name: dummy
-    build: 
-      dockerfile: ./dummyServer/Dockerfile
-    ports:
-    - 9703:9703
-    networks:
-      - internal
 
 
 networks:
   gateway:
     external: true
     name: g-auth
-  internal:
-    external: false
   farmer-be:
     name: a-farmer-be
   client-be:

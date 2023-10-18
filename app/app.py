@@ -108,14 +108,14 @@ def register(role):
         head = {h_mail : mail, h_pass : passw, h_name : name}
     
         # Response
-        dict_response = requests.post(url=dbClientAddress+"/signup", params=head)
+        dict_response = requests.post(url=dbClientAddress, params=head)
     
     # debug
     #print(dict_response.text)
     
     # get the dictionary of the response
     r = json.loads(dict_response.text)
-    
+    return head
     
     #Succesfuly created user in db
     if(r[h_succ] ):
