@@ -18,90 +18,145 @@ h_name = "name"
 h_address = "address"
 h_succ = "success"
 
-dbAddress = "http://127.0.0.1:9703/login"
-dbAddressSU = "http://127.0.0.1:9703/signup"
+dbAddress = "http://farmer-be:9703/farmer/login"
+dbAddressSU = "http://farmer-be:9703/farmer"
 
 s_invalidToke = "FAIL"
 
 @app.route('/login', methods=['POST'])
 def login():
     
-    mail = request.args.get(h_mail)
-    passw = request.args.get(h_pass)
-    role = "Client"
+    requestBody = request.get_json()
+    
+    mail = requestBody['mail']
+    passw = requestBody['password']
+    
+    print("Received Mail: " + mail)
+    print("Received Password: " + passw)
+    
+    role = "Farmer"
 
     headerToken = {"mail" : mail, "algorithm":"HS256", "algo":"HS256" }
     
-    head = {h_mail : "test@gmail.com"}
+    head = {h_mail : mail}
     
-    dict_response = requests.post(url=dbAddress, params=head)
+    RequestToFarmerBody = {
+        "email" : mail
+    }
     
-    #print(dict_response.text)
+    response = requests.post(url=dbAddress, json = RequestToFarmerBody)
     
-    r = json.loads(dict_response.text)
+    print("Response from Farmer_BE")
     
+    print(response.json())
     
-    if(r[h_pass] == passw ):
-        token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken)
+    responseDict = response.json()
+    
+
+
+    if(responseDict[h_pass] == passw ):
+        token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken).decode('utf-8')
         suc = True
     else:
         token = s_invalidToke
         suc = False
     
     
-    return jsonify({h_succ : suc , h_token: token })
+    return {h_succ : suc , h_token: token }
+    
+    
 
-#Request
 @app.route('/signup', methods=['POST'])
 def register():
     
     # Get all info per specification
     
-    mail = request.args.get(h_mail)
-    passw = request.args.get(h_pass)
+    requestBody = request.get_json()
+    
+    mail = requestBody[h_mail]
+    passw = requestBody[h_pass]
     #name = request.args.get(h_name)
-    username = request.args.get(h_username)
-    image = request.args.get(h_image)
-    area = request.args.get(h_area)
-    address = request.args.get(h_address)
-    role = "Client"
+    username = requestBody[h_username]
+    image = requestBody[h_image]
+    area = requestBody[h_area]
+    address = requestBody[h_address]
+
+    role = "Farmer"
 
     #head of toke, uncrypted
     headerToken = {h_mail : mail, h_role: role, "algo":"HS256" }
     
     # Paramethers for the post request to the db
-    head = {h_mail : mail, h_pass : passw, h_username : username, h_image:image,h_area:area,h_address:address}
+    #head = {h_mail : mail, h_pass : passw, h_username : username, h_image:image,h_area:area,h_address:address}
+    
+    # Body for the post request to the db
+    
+    postBody = {
+        "username" : username,
+        "email" : mail,
+        "password" : passw,
+        "image" : image,
+        "area" : area,
+        "address" : address
+    }
+    
     
     # Response
-    dict_response = requests.post(url=dbAddressSU, params=head)
+    dictResponse = requests.post(url=dbAddressSU, json=postBody)
     
-    #print(dict_response.text)
     
-    # get the dictionary of the response
-    r = json.loads(dict_response.text)
+    print("FarmerBE Response: ")
+    print(dictResponse.json())
     
+    # Body of the response
+    ResponseBody = dictResponse.json()
+    
+    print("User succesfully created in the db")
     
     #Succesfuly created user in db
-    if(r[h_succ] ):
-        token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken)
+    if(ResponseBody['success'] == True):
+        
+        dictToEncode = {
+            h_mail : mail,
+            h_pass : passw,
+            h_role : role
+        }
+    
+        token = jwt.encode(payload=dictToEncode, key=secret, algorithm="HS256", headers=headerToken).decode('utf-8')
+        
+        #token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken)
         suc = True
+    
+    
     # no new user
     else:
         token = s_invalidToke
         suc = False
     
-    return jsonify({h_succ:suc, h_token: token})
-
-@app.route('/verifyToken', methods=['GET'])
+    
+    finalResponse = {
+        h_succ : suc,
+        h_token: token
+    }
+    
+    return finalResponse
+    
+    #return jsonify({h_succ:suc, h_token: token})
+    
+    
+@app.route('/verifyToken', methods=['POST'])
 def verifyToken():
-    token_recived = request.args.get(h_token)
+    
+    requestBody = request.get_json()
+    
+    token_received = requestBody[h_token]
     
     try:
-        dicHeaders = jwt.get_unverified_header(token_recived)
+        dicHeaders = jwt.get_unverified_header(token_received)
         
         print(dicHeaders)
         
-        verify = jwt.decode(token_recived, secret, algorithms=dicHeaders["algo"])
+        verify = jwt.decode(token_received, secret, algorithms=dicHeaders["algo"])
 
         return jsonify({h_succ:True})
         
@@ -111,6 +166,7 @@ def verifyToken():
         return jsonify({h_succ:False})
     
     return jsonify({h_succ:False})
-
+    
 if __name__ == "__main__":
     app.run(debug=True)
+    

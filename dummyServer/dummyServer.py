@@ -21,9 +21,9 @@ h_succ = "success"
 @app.route('/login', methods=['post'])
 def getUser():
     
-    reqBody = request.get_json()
+    mail = request.args.get(h_mail)
     
-    mail = reqBody['mail']
+    print(request.headers)
     
     if (mail == "test@gmail.com"):
         return jsonify({h_succ:True, h_pass: "Difficult password"})
@@ -49,4 +49,4 @@ def signup():
     return jsonify({h_succ:True})
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=9703, debug=True)
+    app.run(host="0.0.0.0", port=9703, debug=True)
