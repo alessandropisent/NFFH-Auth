@@ -17,14 +17,15 @@ h_token = "token"
 h_name = "name"
 h_address = "address"
 h_succ = "success"
+h_errStringLogin = "error"
 
-dbAddress = "http://farmer-be:9703/farmer/login"
-dbAddressSU = "http://farmer-be:9703/farmer"
+dbClientAddress = "http://client-be:9702"
+dbFarmerAddress = "http://farmer-be:9703"
 
 s_invalidToke = "FAIL"
 
-@app.route('/login', methods=['POST'])
-def login():
+@app.route('/<role>/login', methods=['POST'])
+def login(role):
     
     requestBody = request.get_json()
     
@@ -34,40 +35,60 @@ def login():
     print("Received Mail: " + mail)
     print("Received Password: " + passw)
     
-    role = "Farmer"
 
-    headerToken = {"mail" : mail, "algorithm":"HS256", "algo":"HS256" }
+
+    headerToken = {
+        "mail" : mail, 
+        "algo":"HS256"
+    }
     
-    head = {h_mail : mail}
     
-    RequestToFarmerBody = {
+    RequestToBEBody = {
         "email" : mail
     }
     
-    response = requests.post(url=dbAddress, json = RequestToFarmerBody)
+    toEncryptData = { 
+        h_mail:mail, 
+        h_pass:passw, 
+        h_role : role
+    }
+    
+    # Depending on role i will do requests on differt servers
+    if role == "farmer":
+        dict_response = requests.post(url=dbFarmerAddress+"/login", json = RequestToBEBody)
+    elif role == "client":
+        dict_response = requests.post(url=dbClientAddress+"/login", json = RequestToBEBody)
+    
+    #response = requests.post(url=dbAddress, json = RequestToFarmerBody)
     
     print("Response from Farmer_BE")
     
-    print(response.json())
+    print(dict_response.json())
     
-    responseDict = response.json()
-    
-
-
-    if(responseDict[h_pass] == passw ):
-        token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken).decode('utf-8')
-        suc = True
-    else:
+    # if the db response = no succ -> no mail in the db
+    if( not dict_response[h_succ] ):
+        suc = False
+        token = s_invalidToke
+        errString = "NO_MAIL"
+        
+    # if invalid password and valid
+    elif(dict_response[h_pass] != passw ):
         token = s_invalidToke
         suc = False
+        errString = "NO_PASS"
+    else:
+        token = jwt.encode(payload=toEncryptData, key=secret, algorithm="HS256",headers=headerToken)
+        suc = False
+        errString = "GOOD"
     
     
-    return {h_succ : suc , h_token: token }
-    
+    return jsonify({h_succ : suc , h_token: token, h_errStringLogin:errString})
+
+
     
 
-@app.route('/signup', methods=['POST'])
-def register():
+@app.route('/<role>/signup', methods=['POST'])
+def register(role):
     
     # Get all info per specification
     
@@ -75,41 +96,62 @@ def register():
     
     mail = requestBody[h_mail]
     passw = requestBody[h_pass]
-    #name = request.args.get(h_name)
     username = requestBody[h_username]
     image = requestBody[h_image]
     area = requestBody[h_area]
     address = requestBody[h_address]
 
-    role = "Farmer"
-
     #head of toke, uncrypted
-    headerToken = {h_mail : mail, h_role: role, "algo":"HS256" }
+    headerToken = {
+        h_mail : mail, 
+        h_role: role, 
+        "algo":"HS256" 
+    }
     
     # Paramethers for the post request to the db
     #head = {h_mail : mail, h_pass : passw, h_username : username, h_image:image,h_area:area,h_address:address}
     
     # Body for the post request to the db
     
-    postBody = {
-        "username" : username,
-        "email" : mail,
-        "password" : passw,
-        "image" : image,
-        "area" : area,
-        "address" : address
-    }
+    if (role == "farmer"):
+    
+        postBody = {
+            "username" : username,
+            "email" : mail,
+            "password" : passw,
+            "image" : image,
+            "area" : area,
+            "address" : address
+        }
     
     
-    # Response
-    dictResponse = requests.post(url=dbAddressSU, json=postBody)
+        # Response
+        dictResponse = requests.post(url=dbFarmerAddress, json=postBody)
+
+
+        #print("FarmerBE Response:")
+        #print(dictResponse.json())
+
+        # Body of the response
+        ResponseBody = dictResponse.json()
+    
+    elif (role == "client"):
+        postBody = {
+            "username" : username,
+            "email" : mail,
+            "password" : passw
+        }
     
     
-    print("FarmerBE Response: ")
-    print(dictResponse.json())
-    
-    # Body of the response
-    ResponseBody = dictResponse.json()
+        # Response
+        dictResponse = requests.post(url=dbFarmerAddress, json=postBody)
+
+
+        #print("FarmerBE Response:")
+        #print(dictResponse.json())
+
+        # Body of the response
+        ResponseBody = dictResponse.json()
     
     print("User succesfully created in the db")
     
@@ -168,5 +210,5 @@ def verifyToken():
     return jsonify({h_succ:False})
     
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=9701, host='0.0.0.0',debug=True)
     
