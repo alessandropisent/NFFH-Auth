@@ -155,7 +155,7 @@ def register(role):
     
     print("User succesfully created in the db")
     
-    return ResponseBody
+    #return ResponseBody
     
     #Succesfuly created user in db
     if(ResponseBody['success'] == True):
