@@ -29,7 +29,7 @@ def login(role):
     
     requestBody = request.get_json()
     
-    mail = requestBody['mail']
+    mail = requestBody['email']
     passw = requestBody['password']
     
     print("Received Mail: " + mail)
@@ -53,36 +53,67 @@ def login(role):
         h_role : role
     }
     
+    
     # Depending on role i will do requests on differt servers
     if role == "farmer":
-        dict_response = requests.post(url=dbFarmerAddress+"/login", json = RequestToBEBody)
+        dict_response = requests.post(url=dbFarmerAddress+"/farmer/login", json=RequestToBEBody, stream=False)
     elif role == "client":
-        dict_response = requests.post(url=dbClientAddress+"/login", json = RequestToBEBody)
+        dict_response = requests.post(url=dbClientAddress+"/client/login", json=RequestToBEBody)
+    
+    
+    
     
     #response = requests.post(url=dbAddress, json = RequestToFarmerBody)
     
     print("Response from Farmer_BE")
     
-    print(dict_response.json())
+    # Attempt to parse the response as JSON
+    r_text = dict_response.text
+    
+    
+    r = json.loads(json.dumps(r_text))
+    
+        
+    s = r["success"]
+    res_psw = r["password"]
     
     # if the db response = no succ -> no mail in the db
-    if( not dict_response[h_succ] ):
+    if( s == False ):
         suc = False
         token = s_invalidToke
         errString = "NO_MAIL"
         
     # if invalid password and valid
-    elif(dict_response[h_pass] != passw ):
+    elif(res_psw != passw ):
         token = s_invalidToke
         suc = False
         errString = "NO_PASS"
     else:
         token = jwt.encode(payload=toEncryptData, key=secret, algorithm="HS256",headers=headerToken)
-        suc = False
+        suc = True
         errString = "GOOD"
+        print("DIOCAN")
+        
     
     
-    return jsonify({h_succ : suc , h_token: token, h_errStringLogin:errString})
+    
+    #return dict_response.json()
+
+    
+    print(s)
+    print(res_psw)
+    
+    
+    
+    
+    print("DIOSTRONZO")
+    final_Response = {
+        "success" : suc , 
+        "token": token, 
+        "error":errString
+    }
+    
+    return final_Response
 
 
     
@@ -100,6 +131,8 @@ def register(role):
     image = requestBody[h_image]
     area = requestBody[h_area]
     address = requestBody[h_address]
+    
+
 
     #head of toke, uncrypted
     headerToken = {
@@ -124,9 +157,8 @@ def register(role):
             "address" : address
         }
     
-    
         # Response
-        dictResponse = requests.post(url=dbFarmerAddress, json=postBody)
+        dictResponse = requests.post(url=dbFarmerAddress+"/farmer", json=postBody)
 
 
         #print("FarmerBE Response:")
@@ -155,7 +187,7 @@ def register(role):
     
     print("User succesfully created in the db")
     
-    #return ResponseBody
+    
     
     #Succesfuly created user in db
     if(ResponseBody['success'] == True):
