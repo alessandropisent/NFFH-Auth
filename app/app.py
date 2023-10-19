@@ -155,6 +155,8 @@ def register(role):
     
     print("User succesfully created in the db")
     
+    return ResponseBody
+    
     #Succesfuly created user in db
     if(ResponseBody['success'] == True):
         
@@ -210,5 +212,5 @@ def verifyToken():
     return jsonify({h_succ:False})
     
 if __name__ == "__main__":
-    app.run(debug=True, port=9701, host='0.0.0.0',debug=True)
+    app.run(debug=True, port=9701, host='0.0.0.0')
     
