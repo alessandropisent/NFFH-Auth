@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, make_response, request, render_template, session, flash
 import jwt
 import requests
-import json
 
 app = Flask(__name__)
 
@@ -27,26 +26,25 @@ s_invalidToke = "FAIL"
 @app.route('/<role>/login', methods=['POST'])
 def login(role):
     
+    # Dictionary of the json in the body of the request
     requestBody = request.get_json()
     
+    # variable to store
     mail = requestBody['email']
     passw = requestBody['password']
     
-    print("Received Mail: " + mail)
-    print("Received Password: " + passw)
-    
-
-
+    # Header of the token UNCRYPTED
     headerToken = {
         "mail" : mail, 
         "algo":"HS256"
     }
     
-    
+    # Request to do at the BE
     RequestToBEBody = {
         "email" : mail
     }
     
+    # Data that will be encrypted in the token
     toEncryptData = { 
         h_mail:mail, 
         h_pass:passw, 
@@ -56,57 +54,29 @@ def login(role):
     
     # Depending on role i will do requests on differt servers
     if role == "farmer":
-        dict_response = requests.post(url=dbFarmerAddress+"/farmer/login", json=RequestToBEBody, stream=False)
+        dict_response = requests.post(url=dbFarmerAddress+"/farmer/login", json=RequestToBEBody).json() 
     elif role == "client":
-        dict_response = requests.post(url=dbClientAddress+"/client/login", json=RequestToBEBody)
-    
-    
-    
-    
-    #response = requests.post(url=dbAddress, json = RequestToFarmerBody)
-    
-    print("Response from Farmer_BE")
-    
-    # Attempt to parse the response as JSON
-    r_text = dict_response.text
-    
-    
-    r = json.loads(json.dumps(r_text))
-    
-        
-    s = r["success"]
-    res_psw = r["password"]
+        dict_response = requests.post(url=dbClientAddress+"/client/login", json=RequestToBEBody).json()
     
     # if the db response = no succ -> no mail in the db
-    if( s == False ):
+    if( dict_response["success"] == False ):
         suc = False
         token = s_invalidToke
         errString = "NO_MAIL"
         
-    # if invalid password and valid
-    elif(res_psw != passw ):
+    # if invalid password and succ : True
+    elif(dict_response["password"] != passw ):
         token = s_invalidToke
         suc = False
         errString = "NO_PASS"
+    # There is the user in db and the pass is valid
     else:
-        token = jwt.encode(payload=toEncryptData, key=secret, algorithm="HS256",headers=headerToken)
+        # Here lies 5h of our time just to remember that you need to add .decode in this sting
+        token = jwt.encode(payload=toEncryptData, key=secret, algorithm="HS256",headers=headerToken).decode('utf-8')
         suc = True
         errString = "GOOD"
-        print("DIOCAN")
-        
-    
-    
-    
-    #return dict_response.json()
 
-    
-    print(s)
-    print(res_psw)
-    
-    
-    
-    
-    print("DIOSTRONZO")
+    # Json of the responsee to the FE
     final_Response = {
         "success" : suc , 
         "token": token, 
@@ -122,17 +92,15 @@ def login(role):
 def register(role):
     
     # Get all info per specification
-    
     requestBody = request.get_json()
     
+    # all paramaters in the json of the post
     mail = requestBody[h_mail]
     passw = requestBody[h_pass]
     username = requestBody[h_username]
     image = requestBody[h_image]
     area = requestBody[h_area]
     address = requestBody[h_address]
-    
-
 
     #head of toke, uncrypted
     headerToken = {
@@ -140,9 +108,6 @@ def register(role):
         h_role: role, 
         "algo":"HS256" 
     }
-    
-    # Paramethers for the post request to the db
-    #head = {h_mail : mail, h_pass : passw, h_username : username, h_image:image,h_area:area,h_address:address}
     
     # Body for the post request to the db
     
@@ -160,10 +125,6 @@ def register(role):
         # Response
         dictResponse = requests.post(url=dbFarmerAddress+"/farmer", json=postBody)
 
-
-        #print("FarmerBE Response:")
-        #print(dictResponse.json())
-
         # Body of the response
         ResponseBody = dictResponse.json()
     
@@ -177,30 +138,26 @@ def register(role):
     
         # Response
         dictResponse = requests.post(url=dbFarmerAddress, json=postBody)
-
-
-        #print("FarmerBE Response:")
-        #print(dictResponse.json())
-
-        # Body of the response
+        # dictionary of the body of the response
         ResponseBody = dictResponse.json()
     
-    print("User succesfully created in the db")
+    #debug
+    #print("User succesfully created in the db")
     
     
     
     #Succesfuly created user in db
     if(ResponseBody['success'] == True):
         
+        # Info to be encrypeted in the token
         dictToEncode = {
             h_mail : mail,
             h_pass : passw,
             h_role : role
         }
-    
-        token = jwt.encode(payload=dictToEncode, key=secret, algorithm="HS256", headers=headerToken).decode('utf-8')
         
-        #token = jwt.encode(payload=dict({h_mail:mail, h_pass:passw, h_role : role}), key=secret, algorithm="HS256",headers=headerToken)
+        # token generated ed encoded
+        token = jwt.encode(payload=dictToEncode, key=secret, algorithm="HS256", headers=headerToken).decode('utf-8')
         suc = True
     
     
@@ -209,7 +166,7 @@ def register(role):
         token = s_invalidToke
         suc = False
     
-    
+    # Build the json of the response
     finalResponse = {
         h_succ : suc,
         h_token: token
@@ -217,14 +174,14 @@ def register(role):
     
     return finalResponse
     
-    #return jsonify({h_succ:suc, h_token: token})
-    
-    
+# Post for verification of the token of the user    
 @app.route('/verifyToken', methods=['POST'])
 def verifyToken():
     
+    #dictionary of the json of the response
     requestBody = request.get_json()
     
+    # token from dict
     token_received = requestBody[h_token]
     
     try:
@@ -234,14 +191,14 @@ def verifyToken():
         
         verify = jwt.decode(token_received, secret, algorithms=dicHeaders["algo"])
 
-        return jsonify({h_succ:True})
+        return {h_succ:True}
         
         
     except jwt.exceptions.DecodeError:
         
-        return jsonify({h_succ:False})
+        return {h_succ:False}
     
-    return jsonify({h_succ:False})
+    return {h_succ:False}
     
 if __name__ == "__main__":
     app.run(debug=True, port=9701, host='0.0.0.0')
