@@ -1,8 +1,11 @@
-FROM python:3.11.2-alpine
+FROM python:3.11.6-alpine3.18
 
 WORKDIR /app
 
+
+
 COPY /app/requirements.txt /app
+
 RUN pip3 install -r requirements.txt
 
 COPY ./app /app
