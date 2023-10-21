@@ -191,7 +191,10 @@ def verifyToken():
         
         verify = jwt.decode(token_received, secret, algorithms=dicHeaders["algo"])
 
-        return {h_succ:True, h_mail: verify.get("email")}
+        return {
+            h_succ:True, 
+            h_mail: verify.get("email"),
+            h_role: verify.get(h_role)}
         
         
     except jwt.exceptions.DecodeError:
