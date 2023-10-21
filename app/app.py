@@ -57,7 +57,8 @@ def login(role):
         dict_response = requests.post(url=dbFarmerAddress+"/farmer/login", json=RequestToBEBody).json() 
     elif role == "client":
         dict_response = requests.post(url=dbClientAddress+"/client/login", json=RequestToBEBody).json()
-    
+    elif role == "admin":
+        dict_response = {'password': 'mario', 'success': True}
     # if the db response = no succ -> no mail in the db
     if( dict_response["success"] == False ):
         suc = False
