@@ -56,7 +56,7 @@ def login(role):
     if role == "farmer":
         dict_response = requests.post(url=dbFarmerAddress+"/farmer/login", json=RequestToBEBody).json() 
     elif role == "client":
-        dict_response = requests.post(url=dbClientAddress+"/client/login", json=RequestToBEBody).json()
+        dict_response = requests.post(url=dbClientAddress+"/customer/login", json=RequestToBEBody).json()
     elif role == "admin":
         dict_response = {'password': 'mario', 'success': True}
     # if the db response = no succ -> no mail in the db
@@ -99,9 +99,11 @@ def register(role):
     mail = requestBody[h_mail]
     passw = requestBody[h_pass]
     username = requestBody[h_username]
-    image = requestBody[h_image]
-    area = requestBody[h_area]
-    address = requestBody[h_address]
+    if(role == "farmer"):
+        image = requestBody[h_image]
+        area = requestBody[h_area]
+        address = requestBody[h_address]
+    
 
     #head of toke, uncrypted
     headerToken = {
@@ -136,9 +138,8 @@ def register(role):
             "password" : passw
         }
     
-    
         # Response
-        dictResponse = requests.post(url=dbFarmerAddress, json=postBody)
+        dictResponse = requests.post(url=dbClientAddress+"/customer", json=postBody)
         # dictionary of the body of the response
         ResponseBody = dictResponse.json()
     
