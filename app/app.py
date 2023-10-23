@@ -17,6 +17,7 @@ h_name = "name"
 h_address = "address"
 h_succ = "success"
 h_errStringLogin = "error"
+h_id = "id"
 
 dbClientAddress = "http://client-be:9702"
 dbFarmerAddress = "http://farmer-be:9703"
@@ -58,7 +59,7 @@ def login(role):
     elif role == "client":
         dict_response = requests.post(url=dbClientAddress+"/customer/login", json=RequestToBEBody).json()
     elif role == "admin":
-        dict_response = {'password': 'mario', 'success': True}
+        dict_response = {'password': 'mario', 'success': True, h_id : 'admin'}
     # if the db response = no succ -> no mail in the db
     if( dict_response["success"] == False ):
         suc = False
@@ -81,7 +82,9 @@ def login(role):
     final_Response = {
         "success" : suc , 
         "token": token, 
-        "error":errString
+        "error":errString,
+        "id" : dict_response["id"],
+        "username": dict_response["username"]
     }
     
     return final_Response
@@ -147,7 +150,6 @@ def register(role):
     #print("User succesfully created in the db")
     
     
-    
     #Succesfuly created user in db
     if(ResponseBody['success'] == True):
         
@@ -171,7 +173,8 @@ def register(role):
     # Build the json of the response
     finalResponse = {
         h_succ : suc,
-        h_token: token
+        h_token: token,
+        h_id: ResponseBody[h_id]
     }
     
     return finalResponse
