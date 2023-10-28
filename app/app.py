@@ -59,7 +59,7 @@ def login(role):
     elif role == "client":
         dict_response = requests.post(url=dbClientAddress+"/customer/login", json=RequestToBEBody).json()
     elif role == "admin":
-        dict_response = {'password': 'mario', 'success': True, h_id : 'admin'}
+        dict_response = {'password': 'mario', 'success': True, h_id : 'admin', "username":"admin"}
     # if the db response = no succ -> no mail in the db
     if( dict_response["success"] == False ):
         suc = False
