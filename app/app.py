@@ -142,7 +142,7 @@ def register(role):
         }
     
         # Response
-        dictResponse = requests.post(url=dbClientAddress+"/customer", json=postBody)
+        dictResponse = requests.post(url=dbClientAddress+"/client", json=postBody)
         # dictionary of the body of the response
         ResponseBody = dictResponse.json()
     
